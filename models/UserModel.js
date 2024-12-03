@@ -22,5 +22,13 @@ userSchema.plugin(passportLocalMongoose, {
     passwordField: 'password',
 });
 
+userSchema.pre('save', async function (next) {
+    const existingUser = await mongoose.model('User').findOne({ username: this.username });
+    if (existingUser) {
+        throw new Error('Username already exists');
+    }
+    next();
+});
+
 const User = mongoose.model('User', userSchema);
 module.exports = User;

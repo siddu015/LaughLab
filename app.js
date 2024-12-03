@@ -6,6 +6,7 @@ const methodOverride = require('method-override');
 const ejsMate = require("ejs-mate");
 const passport = require("./passportConfig");
 const session = require("express-session");
+const { isAuthenticated, trackSession } = require('./middleware');
 
 const port = 8080;
 const MONGO_URL = "mongodb://127.0.0.1:27017/laughLab";
@@ -31,11 +32,16 @@ app.use(session({
 app.use(passport.initialize());
 app.use(passport.session());
 
-const userRouter = require("./routes/user.js");
-app.use("/", userRouter);
+app.use(trackSession); // Logs session info for all routes
 
-app.get("/", (req, res) => {
-    res.send("Welcome to LaughLab");
+const userRouter = require("./routes/user.js");
+const chatRouter = require("./routes/chat");
+
+app.use("/", userRouter);
+app.use("/", chatRouter);
+
+app.get("/", isAuthenticated, (req, res) => {
+    res.render("../views/index.ejs");
 });
 
 app.all("*", (req, res) => {

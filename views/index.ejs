@@ -1,0 +1,31 @@
+
+<h1>Welcome to LaughLab</h1>
+<div style="text-align: center; margin-top: 50px;">
+    <button id="createChatButton">Create New Chat</button>
+</div>
+
+<script>
+    const createChatButton = document.getElementById('createChatButton');
+
+    createChatButton.addEventListener('click', async () => {
+        const username = prompt('Enter the username:');
+
+        if (!username) {
+            alert('Username is required.');
+            return;
+        }
+
+        try {
+            const response = await axios.post('/create-chat', { username });
+
+            if (response.data.success) {
+                alert(`Chat session created! Session ID: ${response.data.chatSessionId}`);
+            } else {
+                alert(response.data.message);
+            }
+        } catch (error) {
+            console.error('Error creating chat:', error);
+            alert('An error occurred. Please try again.');
+        }
+    });
+</script>
