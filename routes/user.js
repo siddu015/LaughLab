@@ -1,3 +1,6 @@
+//routes/user.js
+
+
 const express = require('express');
 const router = express.Router();
 const User = require('../models/UserModel');
@@ -12,6 +15,7 @@ router.get('/register', async (req, res) => {
 
 router.post('/register', async (req, res) => {
     const { username, password, confirmPassword, isMemeRecommendationEnabled } = req.body;
+
 
     if (password !== confirmPassword) {
         return res.status(400).send('Passwords do not match');

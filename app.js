@@ -8,6 +8,7 @@ const passport = require("./passportConfig");
 const session = require("express-session");
 const { isAuthenticated, trackSession } = require('./middleware');
 
+
 const port = 8080;
 const MONGO_URL = "mongodb://127.0.0.1:27017/laughLab";
 
@@ -15,6 +16,7 @@ mongoose.connect(MONGO_URL)
     .then(() => console.log("Connected to DB"))
     .catch(err => console.log(err));
 
+app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views"));
@@ -35,13 +37,13 @@ app.use(passport.session());
 app.use(trackSession); // Logs session info for all routes
 
 const userRouter = require("./routes/user.js");
-const chatRouter = require("./routes/chat");
+const chatRouter = require("./routes/chat.js");
 
 app.use("/", userRouter);
 app.use("/", chatRouter);
 
-app.get("/", isAuthenticated, (req, res) => {
-    res.redirect("/dashboard");
+app.get("/", (req, res) => {
+    res.render("../views/loader.ejs");
 });
 
 app.all("*", (req, res) => {
