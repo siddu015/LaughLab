@@ -1,39 +1,81 @@
 const mongoose = require('mongoose');
+const { v4: uuidv4 } = require('uuid');
 
-const chatSchema = new mongoose.Schema({
+const messageSchema = new mongoose.Schema({
     messageId: {
         type: String,
-        required: true,
-        unique: true,  // Each message should have a unique ID
+        default: uuidv4,  // This will automatically generate a unique ID for each message
     },
     senderId: {
-        type: String,
+        type: mongoose.Schema.Types.ObjectId,
         required: true,
-        ref: 'User',  // Reference to the User model (sender)
+        ref: 'User',
     },
     receiverId: {
-        type: String,
+        type: mongoose.Schema.Types.ObjectId,
         required: true,
-        ref: 'User',  // Reference to the User model (receiver)
+        ref: 'User',
     },
     message: {
         type: String,
-        required: true,  // Content of the message
+        required: function () {
+            return this.messageType === 'text';
+        },
     },
-    timestamp: {
-        type: Date,
-        default: Date.now,  // Automatically set to current timestamp
-    },
-    readStatus: {
-        type: Boolean,
-        default: false,  // Initially set to false (message unread)
+    mediaUrl: {
+        type: String,
+        required: function () {
+            return this.messageType === 'image' || this.messageType === 'meme';
+        },
     },
     messageType: {
         type: String,
-        enum: ['text', 'image', 'meme'],  // Types of messages
-        default: 'text',  // Default message type is 'text'
+        enum: ['text', 'image', 'meme'],
+        default: 'text',
+    },
+    timestamp: {
+        type: Date,
+        default: Date.now,
+    },
+    readStatus: {
+        type: Boolean,
+        default: false,
     },
 });
 
+
+const chatSchema = new mongoose.Schema({
+    participants: [
+        {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'User',
+            required: true,
+        },
+    ],
+    messages: [messageSchema],
+    lastMessage: {
+        type: String,
+        default: '',
+    },
+    lastUpdated: {
+        type: Date,
+        default: Date.now,
+    },
+    memeRecommendation: {
+        type: Boolean,
+        default: false,
+    },
+});
+
+chatSchema.pre('save', function (next) {
+    if (this.messages && this.messages.length > 0) {
+        const lastMsg = this.messages[this.messages.length - 1];
+        this.lastMessage = lastMsg.messageType === 'text' ? lastMsg.message : `Sent a ${lastMsg.messageType}`;
+        this.lastUpdated = Date.now();
+    }
+    next();
+});
+
 const Chat = mongoose.model('Chat', chatSchema);
+
 module.exports = Chat;
