@@ -83,10 +83,31 @@
         .participants {
             margin-bottom: 20px;
         }
+
+        .reload-btn {
+            background-color: #ff9800;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 10px;
+            cursor: pointer;
+            font-size: 14px;
+            text-align: center;
+            margin-bottom: 20px;
+            display: block;
+            width: 100%;
+        }
+
+        .reload-btn:hover {
+            background-color: #f57c00;
+        }
     </style>
 </head>
 <body>
 <div class="chat-container">
+    <!-- Reload Button -->
+    <button class="reload-btn" onclick="window.location.href = '/chat/<%= chatSession._id %>';">Reload Chat</button>
+
     <div class="chat-header">
         <h2>Chat with <%= chatSession.participants[0].username %> & <%= chatSession.participants[1].username %></h2>
     </div>
@@ -112,5 +133,6 @@
         </form>
     </div>
 </div>
+
 </body>
 </html>
