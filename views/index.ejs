@@ -1,31 +1,36 @@
-
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LaughLab Dashboard</title>
+</head>
+<body>
 <h1>Welcome to LaughLab</h1>
+
 <div style="text-align: center; margin-top: 50px;">
-    <button id="createChatButton">Create New Chat</button>
+    <form action="/create-chat" method="POST" style="display: inline-block;">
+        <label for="username">Enter Username:</label><br>
+        <input type="text" id="username" name="username" placeholder="Enter username" required><br><br>
+        <button type="submit">Create Chat Session</button>
+    </form>
 </div>
 
-<script>
-    const createChatButton = document.getElementById('createChatButton');
+<h2 style="text-align: center; margin-top: 30px;">Your Previous Chats</h2>
 
-    createChatButton.addEventListener('click', async () => {
-        const username = prompt('Enter the username:');
+<% if (chatSessions && chatSessions.length > 0) { %>
+    <ul style="list-style-type: none; text-align: center;">
+        <% chatSessions.forEach(session => { %>
+            <li>
+                <a href="/chat/<%= session._id %>">
+                    Chat with <%= session.participants.find(p => p._id.toString() !== user._id.toString()).username %>
+                </a>
+            </li>
+        <% }); %>
+    </ul>
+<% } else { %>
+    <p style="text-align: center;">You don't have any chat sessions yet.</p>
+<% } %>
 
-        if (!username) {
-            alert('Username is required.');
-            return;
-        }
-
-        try {
-            const response = await axios.post('/create-chat', { username });
-
-            if (response.data.success) {
-                alert(`Chat session created! Session ID: ${response.data.chatSessionId}`);
-            } else {
-                alert(response.data.message);
-            }
-        } catch (error) {
-            console.error('Error creating chat:', error);
-            alert('An error occurred. Please try again.');
-        }
-    });
-</script>
+</body>
+</html>

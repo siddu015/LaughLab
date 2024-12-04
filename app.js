@@ -41,7 +41,7 @@ app.use("/", userRouter);
 app.use("/", chatRouter);
 
 app.get("/", isAuthenticated, (req, res) => {
-    res.render("../views/index.ejs");
+    res.redirect("/dashboard");
 });
 
 app.all("*", (req, res) => {

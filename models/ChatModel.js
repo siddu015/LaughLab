@@ -1,20 +1,25 @@
 const mongoose = require('mongoose');
+const { v4: uuidv4 } = require('uuid');
 
 const messageSchema = new mongoose.Schema({
+    messageId: {
+        type: String,
+        default: uuidv4,  // This will automatically generate a unique ID for each message
+    },
     senderId: {
         type: mongoose.Schema.Types.ObjectId,
         required: true,
-        ref: 'User', // Reference to the User model (sender)
+        ref: 'User',
     },
     receiverId: {
         type: mongoose.Schema.Types.ObjectId,
         required: true,
-        ref: 'User', // Reference to the User model (receiver)
+        ref: 'User',
     },
     message: {
         type: String,
         required: function () {
-            return this.messageType === 'text'; // Required only for text messages
+            return this.messageType === 'text';
         },
     },
     mediaUrl: {
@@ -25,43 +30,43 @@ const messageSchema = new mongoose.Schema({
     },
     messageType: {
         type: String,
-        enum: ['text', 'image', 'meme'], // Supported message types
-        default: 'text', // Default is text
+        enum: ['text', 'image', 'meme'],
+        default: 'text',
     },
     timestamp: {
         type: Date,
-        default: Date.now, // Automatically set to current timestamp
+        default: Date.now,
     },
     readStatus: {
         type: Boolean,
-        default: false, // Initially unread
+        default: false,
     },
 });
+
 
 const chatSchema = new mongoose.Schema({
     participants: [
         {
             type: mongoose.Schema.Types.ObjectId,
-            ref: 'User', // Chat participants (users)
+            ref: 'User',
             required: true,
         },
     ],
-    messages: [messageSchema], // Array of message documents
+    messages: [messageSchema],
     lastMessage: {
-        type: String, // Preview of the last message
+        type: String,
         default: '',
     },
     lastUpdated: {
         type: Date,
-        default: Date.now, // Automatically update whenever a new message is sent
+        default: Date.now,
     },
     memeRecommendation: {
         type: Boolean,
-        default: false, // Toggle for meme recommendations in chat
+        default: false,
     },
 });
 
-// Middleware to update `lastUpdated` and `lastMessage` automatically
 chatSchema.pre('save', function (next) {
     if (this.messages && this.messages.length > 0) {
         const lastMsg = this.messages[this.messages.length - 1];

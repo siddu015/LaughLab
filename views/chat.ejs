@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat Session</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f7f7f7;
+            margin: 0;
+            padding: 0;
+        }
+
+        .chat-container {
+            width: 100%;
+            max-width: 800px;
+            margin: 50px auto;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+        }
+
+        .chat-header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .chat-messages {
+            height: 300px;
+            overflow-y: auto;
+            margin-bottom: 20px;
+            padding-right: 10px;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .message {
+            padding: 10px;
+            margin: 5px 0;
+            border-radius: 5px;
+            max-width: 80%;
+            margin-left: auto;
+        }
+
+        .message.sender {
+            background-color: #d1f7c4;
+            text-align: right;
+        }
+
+        .message.receiver {
+            background-color: #f1f1f1;
+            text-align: left;
+        }
+
+        .chat-input {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .chat-input input {
+            width: 80%;
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            font-size: 14px;
+        }
+
+        .chat-input button {
+            width: 18%;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .chat-input button:hover {
+            background-color: #45a049;
+        }
+
+        .participants {
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+<div class="chat-container">
+    <div class="chat-header">
+        <h2>Chat with <%= chatSession.participants[0].username %> & <%= chatSession.participants[1].username %></h2>
+    </div>
+    <div class="participants">
+        <p>Participants:
+            <strong><%= chatSession.participants[0].username %></strong> and
+            <strong><%= chatSession.participants[1].username %></strong>
+        </p>
+    </div>
+
+    <div class="chat-messages" id="chatMessages">
+        <% chatSession.messages.forEach(message => { %>
+            <div class="message <%= message.senderId.toString() === (user ? user._id.toString() : '') ? 'sender' : 'receiver' %>">
+                <p><%= message.message %></p>
+            </div>
+        <% }) %>
+    </div>
+
+    <div class="chat-input">
+        <form action="/send-message/<%= chatSession._id %>" method="POST">
+            <input type="text" name="message" placeholder="Type a message..." required>
+            <button type="submit">Send</button>
+        </form>
+    </div>
+</div>
+</body>
+</html>
