@@ -5,9 +5,7 @@
         margin: 0;
         padding: 0;
         background-color: #1a1a2e;
-        /* Dark blue-gray background */
         color: #dcdcdc;
-        /* Light text for readability */
     }
 
     h1,
@@ -19,13 +17,11 @@
     h1 {
         font-size: 2.5em;
         color: #cbcbcb;
-        /* Cyan accent */
     }
 
     h2 {
         font-size: 1.8em;
         color: #cbcbcb;
-        /* Light blue accent */
     }
 
     /* Container */
@@ -33,6 +29,30 @@
         max-width: 1000px;
         margin: 0 auto;
         padding: 20px;
+    }
+
+    /* Logout Button */
+    .logout-form {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+    }
+
+    .logout-btn {
+        padding: 10px 15px;
+        border: none;
+        border-radius: 50px;
+        background-color: #411779;
+        /* Solid button color */
+        color: #fff;
+        font-size: 0.9em;
+        cursor: pointer;
+        transition: transform 0.2s;
+    }
+
+    .logout-btn:hover {
+        transform: scale(1.1);
+        /* Hover scaling effect */
     }
 
     /* Form Styling */
@@ -49,7 +69,6 @@
         margin-bottom: 10px;
         display: block;
         color: #9eb1c9;
-        /* Soft gray text */
     }
 
     form input {
@@ -59,7 +78,6 @@
         border: none;
         border-radius: 8px;
         background-color: #2e4057;
-        /* Dark input background */
         color: #dcdcdc;
         font-size: 1em;
     }
@@ -70,7 +88,6 @@
         border: none;
         border-radius: 8px;
         background: linear-gradient(90deg, #1fa2ff, #3c1e72);
-        /* Gradient for buttons */
         color: #fff;
         font-size: 1.1em;
         font-weight: bold;
@@ -135,46 +152,16 @@
         font-size: 1.2em;
         margin-top: 20px;
     }
-
-    /* Footer */
-    footer {
-        text-align: center;
-        margin: 20px 0;
-        color: #666;
-        font-size: 0.9em;
-    }
-
-    footer a {
-        text-decoration: none;
-        color: #5db6f3;
-    }
-
-    footer a:hover {
-        text-decoration: underline;
-    }
-
-    /* Logout Button */
-    .logout-btn {
-        width: 100%;
-        padding: 12px;
-        border: none;
-        border-radius: 8px;
-        background-color: #e74c3c;
-        color: #fff;
-        font-size: 1.1em;
-        font-weight: bold;
-        cursor: pointer;
-        transition: transform 0.2s, box-shadow 0.2s;
-        margin-top: 20px;
-    }
-
-    .logout-btn:hover {
-        transform: scale(1.05);
-        box-shadow: 0 4px 12px rgba(231, 76, 60, 0.5);
-    }
 </style>
 
-<h1>Chat Dashboard</h1>
+<!-- Logout Button Form -->
+<form class="logout-form" action="/logout" method="POST">
+    <button class="logout-btn" type="submit">Logout</button>
+</form>
+
+<h1>
+    <%= user.username%> Dashboard
+</h1>
 <div class="container">
     <!-- Create Chat Section -->
     <form action="/create-chat" method="POST">
@@ -186,26 +173,22 @@
     <!-- Previous Chats Section -->
     <h2>Previous Chat Sessions</h2>
     <div class="chat-list">
-        <% if (chatSessions && chatSessions.length > 0) { %>
+        <% if (chatSessions && chatSessions.length> 0) { %>
             <ul>
-                <% chatSessions.forEach(session => { %>
+                <% chatSessions.forEach(session=> { %>
                     <li>
                         <a href="/chat/<%= session._id %>">
-                            Chat with <%= session.participants.find(p => p._id.toString() !== user._id.toString()).username %>
+                            Chat with <%= session.participants.find(p=> p._id.toString() !==
+                                user._id.toString()).username %>
                         </a>
                         <span>
                             <%= new Date(session.lastUpdated).toLocaleDateString() %>
                         </span>
                     </li>
-                <% }); %>
+                    <% }); %>
             </ul>
-        <% } else { %>
-            <p class="no-chats">You have no previous chat sessions.</p>
-        <% } %>
+            <% } else { %>
+                <p class="no-chats">You have no previous chat sessions.</p>
+                <% } %>
     </div>
-
-    <!-- Logout Button -->
-    <form action="/logout" method="POST">
-        <button class="logout-btn" type="submit">Logout</button>
-    </form>
 </div>

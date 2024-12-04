@@ -1,129 +1,27 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chat Session</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f7f7f7;
-            margin: 0;
-            padding: 0;
-        }
-
-        .chat-container {
-            width: 100%;
-            max-width: 800px;
-            margin: 50px auto;
-            background-color: #fff;
-            border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-            padding: 20px;
-        }
-
-        .chat-header {
-            text-align: center;
-            margin-bottom: 20px;
-        }
-
-        .chat-messages {
-            height: 300px;
-            overflow-y: auto;
-            margin-bottom: 20px;
-            padding-right: 10px;
-            border-bottom: 1px solid #ddd;
-        }
-
-        .message {
-            padding: 10px;
-            margin: 5px 0;
-            border-radius: 5px;
-            max-width: 80%;
-            margin-left: auto;
-        }
-
-        .message.sender {
-            background-color: #d1f7c4;
-            text-align: right;
-        }
-
-        .message.receiver {
-            background-color: #f1f1f1;
-            text-align: left;
-        }
-
-        .chat-input {
-            display: flex;
-            justify-content: space-between;
-        }
-
-        .chat-input input {
-            width: 80%;
-            padding: 10px;
-            border-radius: 5px;
-            border: 1px solid #ccc;
-            font-size: 14px;
-        }
-
-        .chat-input button {
-            width: 18%;
-            background-color: #4CAF50;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 14px;
-        }
-
-        .chat-input button:hover {
-            background-color: #45a049;
-        }
-
-        .participants {
-            margin-bottom: 20px;
-        }
-
-        .reload-btn {
-            background-color: #ff9800;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            padding: 10px;
-            cursor: pointer;
-            font-size: 14px;
-            text-align: center;
-            margin-bottom: 20px;
-            display: block;
-            width: 100%;
-        }
-
-        .reload-btn:hover {
-            background-color: #f57c00;
-        }
-    </style>
-</head>
-<body>
 <div class="chat-container">
-    <!-- Reload Button -->
-    <button class="reload-btn" onclick="window.location.href = '/chat/<%= chatSession._id %>';">Reload Chat</button>
-
     <div class="chat-header">
-        <h2>Chat with <%= chatSession.participants[0].username %> & <%= chatSession.participants[1].username %></h2>
-    </div>
-    <div class="participants">
-        <p>Participants:
-            <strong><%= chatSession.participants[0].username %></strong> and
-            <strong><%= chatSession.participants[1].username %></strong>
-        </p>
+        <!-- Reload Button inside the header -->
+        <button class="reload-btn" onclick="window.location.href = '/chat/<%= chatSession._id %>';">Reload Chat</button>
+        <h2>Chat with <%= chatSession.participants[0].username %> & <%= chatSession.participants[1].username %>
+        </h2>
     </div>
 
     <div class="chat-messages" id="chatMessages">
-        <% chatSession.messages.forEach(message => { %>
-            <div class="message <%= message.senderId.toString() === (user ? user._id.toString() : '') ? 'sender' : 'receiver' %>">
-                <p><%= message.message %></p>
+        <% chatSession.messages.forEach(message=> { %>
+            <div
+                class="message-wrapper <%= message.senderId.toString() === (user ? user._id.toString() : '') ? 'sender' : 'receiver' %>">
+                <div
+                    class="message <%= message.senderId.toString() === (user ? user._id.toString() : '') ? 'sender' : 'receiver' %>">
+                    <p>
+                        <%= message.message %>
+                    </p>
+                    <span class="timestamp">
+                        <%= new Date(message.timestamp).toLocaleTimeString([], { hour: '2-digit' , minute: '2-digit' })
+                            %>
+                    </span>
+                </div>
             </div>
-        <% }) %>
+            <% }) %>
     </div>
 
     <div class="chat-input">
@@ -134,5 +32,179 @@
     </div>
 </div>
 
-</body>
-</html>
+
+<style>
+    /* General Styling */
+    body {
+        font-family: 'Roboto', sans-serif;
+        background-color: #e5ddd5;
+        /* Light gray background similar to WhatsApp */
+        color: #333;
+        /* Dark text for readability */
+        margin: 0;
+        padding: 0;
+    }
+
+    /* Chat Container */
+    .chat-container {
+        width: 100%;
+        max-width: 800px;
+        margin: 20px auto;
+        background-color: #ffffff;
+        /* White background for the chat container */
+        border-radius: 20px;
+        overflow: hidden;
+        box-shadow: 0 8px 20px rgba(83, 83, 83, 0.2);
+        display: flex;
+        flex-direction: column;
+    }
+
+    /* Chat Header */
+    .chat-header {
+        background-color: #117034;
+        /* WhatsApp green color */
+        color: #ffffff;
+        padding: 15px;
+        text-align: center;
+        font-size: 18px;
+        border-bottom: 2px solid #128c7e;
+        /* Slightly darker green for border */
+        position: relative;
+    }
+
+    /* Reload Button */
+    .reload-btn {
+        background-color: #000000;
+        /* Light blue color for reload button */
+        color: white;
+        border: none;
+        border-radius: 20px;
+        padding: 8px 20px;
+        cursor: pointer;
+        font-size: 14px;
+        position: absolute;
+        top: 15px;
+        right: 15px;
+        text-align: center;
+    }
+
+    .reload-btn:hover {
+        background-color: #8c1e12;
+        /* Darker blue on hover */
+    }
+
+    /* Chat Messages Area */
+    .chat-messages {
+        background-color: #f8f9fa;
+        /* Light gray background for messages */
+        height: 400px;
+        overflow-y: auto;
+        padding: 20px;
+        font-size: 16px;
+        flex-grow: 1;
+    }
+
+    /* Message Wrapper */
+    .message-wrapper {
+        display: flex;
+        margin: 10px 0;
+    }
+
+    .message-wrapper.sender {
+        justify-content: flex-end;
+    }
+
+    .message-wrapper.receiver {
+        justify-content: flex-start;
+    }
+
+    /* Message Styling */
+    .message {
+        min-width: 50px;
+        display: flex;
+        flex-direction: column;
+        /* Stack message content and timestamp vertically */
+        justify-content: flex-start;
+        align-items: flex-start;
+        max-width: 75%;
+        /* Slightly smaller max-width */
+        padding: 12px;
+        border-radius: 16px;
+        position: relative;
+        line-height: 1.6;
+        word-wrap: break-word;
+    }
+
+    /* Sender Message */
+    .message.sender {
+        background-color: #dcf8c6;
+        /* Light green for sender's messages */
+        color: #000000;
+        text-align: left;
+    }
+
+    /* Receiver Message */
+    .message.receiver {
+        background-color: #ffffff;
+        /* White for receiver's messages */
+        color: #4c4c4c;
+        text-align: left;
+        border: 1px solid #ece5dd;
+        /* Subtle border for receiver's message */
+    }
+
+    /* Timestamp */
+    .timestamp {
+        display: block;
+        font-size: 10px;
+        color: rgba(0, 0, 0, 0.5);
+        /* Darker color for timestamp */
+        position: absolute;
+        bottom: 5px;
+        right: 10px;
+    }
+
+    /* Chat Input */
+    .chat-input {
+        display: flex;
+        background-color: #ffffff;
+        /* White input background */
+        padding: 10px;
+        border-top: 2px solid #ece5dd;
+        /* Subtle top border */
+    }
+
+    .chat-input input {
+        flex-grow: 1;
+        padding: 12px;
+        border: 1px solid #e1e1e1;
+        /* Subtle border around input */
+        border-radius: 20px;
+        background-color: #f0f0f0;
+        /* Light gray background for input */
+        color: #000;
+        font-size: 16px;
+    }
+
+    .chat-input input::placeholder {
+        color: #bbb;
+    }
+
+    /* Send Button */
+    .chat-input button {
+        background-color: #117034;
+        /* WhatsApp green color */
+        color: white;
+        border: none;
+        border-radius: 20px;
+        padding: 12px;
+        font-size: 18px;
+        cursor: pointer;
+        margin-left: 10px;
+    }
+
+    .chat-input button:hover {
+        background-color: #c9240b;
+        /* Darker green on hover */
+    }
+</style>
