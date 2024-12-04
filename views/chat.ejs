@@ -2,22 +2,20 @@
     <div class="chat-header">
         <!-- Reload Button inside the header -->
         <button class="reload-btn" onclick="window.location.href = '/chat/<%= chatSession._id %>';">Reload Chat</button>
-        <h2>Chat with <%= chatSession.participants[0].username %> & <%= chatSession.participants[1].username %>
-        </h2>
+        <h2>Chat with <%= chatSession.participants[0].username %> & <%= chatSession.participants[1].username %></h2>
     </div>
 
     <div class="chat-messages" id="chatMessages">
-        <% chatSession.messages.forEach(message=> { %>
-            <div
-                    class="message-wrapper <%= message.senderId.toString() === (user ? user._id.toString() : '') ? 'sender' : 'receiver' %>">
-                <div
-                        class="message <%= message.senderId.toString() === (user ? user._id.toString() : '') ? 'sender' : 'receiver' %>">
-                    <p>
-                        <%= message.message %>
-                    </p>
+        <% chatSession.messages.forEach(message => { %>
+            <div class="message-wrapper <%= message.senderId.toString() === (user ? user._id.toString() : '') ? 'sender' : 'receiver' %>">
+                <div class="message <%= message.senderId.toString() === (user ? user._id.toString() : '') ? 'sender' : 'receiver' %>">
+                    <% if (message.messageType === 'text') { %>
+                        <p><%= message.message %></p>
+                    <% } else if (message.messageType === 'meme') { %>
+                        <img src="<%= message.mediaUrl %>" alt="Meme" class="meme-image">
+                    <% } %>
                     <span class="timestamp">
-                        <%= new Date(message.timestamp).toLocaleTimeString([], { hour: '2-digit' , minute: '2-digit' })
-                        %>
+                        <%= new Date(message.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) %>
                     </span>
                 </div>
             </div>
@@ -38,6 +36,7 @@
         </div>
     </div>
 </div>
+
 
 <style>
     /* General Styling */
@@ -239,6 +238,13 @@
     #meme-container img:hover {
         transform: scale(1.05); /* Slight zoom effect */
     }
+
+    .meme-image {
+        max-width: 100%; /* Ensure memes don't overflow */
+        height: auto;
+        border-radius: 10px;
+        margin-top: 10px;
+    }
 </style>
 
 <script>
@@ -266,15 +272,35 @@
 
             const { memeUrls } = await response.json(); // Parse the response
 
-            // Display the memes in the chat
             const memesDiv = document.getElementById('recommendedMemes');
             memesDiv.innerHTML = ''; // Clear previous memes
 
+            // Display memes with click-to-send functionality
             memeUrls.forEach(memeUrl => {
                 const img = document.createElement('img');
                 img.src = memeUrl;
                 img.alt = 'Recommended Meme';
-                img.style = 'width: 200px; height: auto; margin: 10px;'; // Style for better visuals
+                img.style = 'width: 200px; height: auto; margin: 10px; cursor: pointer;'; // Make it clickable
+                img.addEventListener('click', async () => {
+                    try {
+                        const sendResponse = await fetch(`/send-message/${chatSessionId}`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ message: memeUrl, messageType: 'meme' }), // Sending meme URL
+                        });
+
+                        if (!sendResponse.ok) {
+                            throw new Error('Failed to send meme');
+                        }
+
+                        // Clear memes and reset to initial state
+                        memesDiv.innerHTML = '';
+                        messageBar.value = ''; // Clear the message bar
+                    } catch (error) {
+                        console.error('Error sending meme:', error);
+                        alert('Could not send the meme.');
+                    }
+                });
                 memesDiv.appendChild(img);
             });
         } catch (error) {

@@ -67,33 +67,39 @@ router.get('/chat/:chatSessionId', isAuthenticated, async (req, res) => {
 
 router.post('/send-message/:chatSessionId', isAuthenticated, async (req, res) => {
     const { chatSessionId } = req.params;
-    const { message } = req.body;
+    const { message, messageType = 'text' } = req.body; // Default to text messages
     const currentUser = req.user;
 
-    const chatSession = await ChatModel.findById(chatSessionId).populate('participants');
-    if (!chatSession) {
-        return res.status(404).send('Chat session not found.');
+    try {
+        const chatSession = await ChatModel.findById(chatSessionId).populate('participants');
+        if (!chatSession) {
+            return res.status(404).send('Chat session not found.');
+        }
+
+        if (!chatSession.participants.some(user => user._id.toString() === currentUser._id.toString())) {
+            return res.status(403).send('You are not authorized to send a message in this chat.');
+        }
+
+        const newMessage = {
+            senderId: currentUser._id,
+            receiverId: chatSession.participants.find(user => user._id.toString() !== currentUser._id.toString())._id,
+            message: messageType === 'text' ? message : undefined,
+            mediaUrl: messageType === 'meme' ? message : undefined, // Store meme URL if messageType is 'meme'
+            messageType: messageType, // Store the type of the message
+        };
+
+        // Push the new message to the chat session's messages array
+        chatSession.messages.push(newMessage);
+
+        // Save the updated chat session
+        await chatSession.save();
+
+        // Respond with success and the updated messages
+        res.status(200).json({ message: 'Message sent successfully.', chatSession });
+    } catch (error) {
+        console.error('Error sending message:', error);
+        res.status(500).send('Error sending message.');
     }
-
-    if (!chatSession.participants.some(user => user._id.toString() === currentUser._id.toString())) {
-        return res.status(403).send('You are not authorized to send a message in this chat.');
-    }
-
-    const newMessage = {
-        senderId: currentUser._id,
-        receiverId: chatSession.participants.find(user => user._id.toString() !== currentUser._id.toString())._id,
-        message: message,
-        messageType: 'text'
-    };
-
-    chatSession.messages.push(newMessage);
-    await chatSession.save();
-
-    // Ensure 'user' is passed to the template when rendering after sending the message
-    res.render('chat', {
-        chatSession: chatSession,
-        user: currentUser // Make sure user is passed to the template
-    });
 });
 
 router.post('/recommend-meme/:chatSessionId', async (req, res) => {
