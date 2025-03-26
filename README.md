@@ -21,7 +21,7 @@ Contextual Relevance: Ensures memes resonate with the specific topic of the conv
 3. Increased Creativity: Inspires users to think outside the box and express themselves in playful ways.
    
 **How It Works**
-Text Analysis
+Text Analysis.
 Identifies keywords, phrases, and topics within conversations to suggest highly relevant memes.
 
 Emoji Recognition
