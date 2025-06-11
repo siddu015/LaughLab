@@ -68,7 +68,7 @@ LaughLab integrates seamlessly with your conversations, utilizing advanced AI to
 3. Increased Creativity: Inspires users to think outside the box and express themselves in playful ways.
 
 **How It Works**
-Text Analysis
+Text Analysis.
 Identifies keywords, phrases, and topics within conversations to suggest highly relevant memes.
 
 Emoji Recognition
