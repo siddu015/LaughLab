@@ -164,10 +164,11 @@
 </h1>
 <div class="container">
     <!-- Create Chat Section -->
-    <form action="/create-chat" method="POST">
+    <form id="create-chat-form" action="/create-chat" method="POST">
         <label for="username">Start a New Chat:</label>
         <input type="text" id="username" name="username" placeholder="Enter username" required>
-        <button type="submit">Create Chat</button>
+        <button type="submit" id="create-chat-btn">Create Chat</button>
+        <div id="error-message" style="color: #ff6b6b; margin-top: 10px; display: none;"></div>
     </form>
 
     <!-- Previous Chats Section -->
@@ -192,3 +193,58 @@
         <% } %>
     </div>
 </div>
+
+<script>
+document.getElementById('create-chat-form').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    
+    const username = document.getElementById('username').value.trim();
+    const errorDiv = document.getElementById('error-message');
+    const button = document.getElementById('create-chat-btn');
+    
+    // Clear previous error
+    errorDiv.style.display = 'none';
+    
+    // Basic validation
+    if (!username) {
+        errorDiv.textContent = 'Please enter a username';
+        errorDiv.style.display = 'block';
+        return;
+    }
+    
+    // Disable button during request
+    button.disabled = true;
+    button.textContent = 'Creating...';
+    
+    try {
+        const response = await fetch('/create-chat', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: `username=${encodeURIComponent(username)}`
+        });
+        
+        if (response.ok && response.redirected) {
+            // Successful redirect
+            window.location.href = response.url;
+        } else if (response.headers.get('Content-Type').includes('application/json')) {
+            // JSON response (likely an error)
+            const result = await response.json();
+            errorDiv.textContent = result.message || 'An error occurred';
+            errorDiv.style.display = 'block';
+        } else {
+            // Handle other responses
+            const text = await response.text();
+            window.location.href = '/dashboard'; // Fallback redirect
+        }
+    } catch (error) {
+        errorDiv.textContent = 'Network error. Please try again.';
+        errorDiv.style.display = 'block';
+    } finally {
+        // Re-enable button
+        button.disabled = false;
+        button.textContent = 'Create Chat';
+    }
+});
+</script>

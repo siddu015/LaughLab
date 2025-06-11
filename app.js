@@ -43,7 +43,11 @@ app.use("/", userRouter);
 app.use("/", chatRouter);
 
 app.get("/", (req, res) => {
-    res.render("../views/loader.ejs");
+    if (req.isAuthenticated()) {
+        res.redirect('/dashboard');
+    } else {
+        res.render("../views/loader.ejs");
+    }
 });
 
 app.all("*", (req, res) => {

@@ -6,7 +6,8 @@ const { v4: uuidv4 } = require('uuid');
 const messageSchema = new mongoose.Schema({
     messageId: {
         type: String,
-        default: uuidv4,  // This will automatically generate a unique ID for each message
+        default: () => uuidv4(),  // Generate a unique ID for each message
+        unique: false,  // Remove uniqueness constraint to prevent index issues
     },
     senderId: {
         type: mongoose.Schema.Types.ObjectId,

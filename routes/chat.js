@@ -10,40 +10,69 @@ const mongoose = require('mongoose');
 router.use(trackSession);
 
 router.get('/dashboard', isAuthenticated, async (req, res) => {
-    const currentUser = req.user;
+    try {
+        const currentUser = req.user;
+        console.log(`Dashboard accessed by user: ${currentUser.username} (ID: ${currentUser._id})`);
 
-    const chatSessions = await ChatModel.find({
-        participants: currentUser._id
-    }).populate('participants', 'username');
+        const chatSessions = await ChatModel.find({
+            participants: currentUser._id
+        }).populate('participants', 'username');
 
-    res.render('../views/index.ejs', { user: currentUser, chatSessions });
+        console.log(`Found ${chatSessions.length} chat sessions for user ${currentUser.username}`);
+
+        res.render('../views/index.ejs', { user: currentUser, chatSessions });
+    } catch (error) {
+        console.error('Error loading dashboard:', error);
+        res.status(500).send('Error loading dashboard. Please try again.');
+    }
 });
 
 router.post('/create-chat', isAuthenticated, async (req, res) => {
-    const { username } = req.body;
-    const currentUser = req.user;
+    try {
+        const { username } = req.body;
+        const currentUser = req.user;
 
-    const existingUser = await User.findOne({ username });
-    if (existingUser) {
-        return res.status(400).send('Chat already exists. Please choose a different username.');
+        // Validate input
+        if (!username || username.trim() === '') {
+            return res.status(400).json({ success: false, message: 'Username is required.' });
+        }
+
+        // Check if user is trying to chat with themselves
+        if (username.trim() === currentUser.username) {
+            return res.status(400).json({ success: false, message: "You cannot create a chat with yourself." });
+        }
+
+        // Find the target user
+        const targetUser = await User.findOne({ username: username.trim() });
+        if (!targetUser) {
+            return res.status(404).json({ success: false, message: 'User not found. Please check the username and try again.' });
+        }
+
+        // Check if a chat session already exists between these users
+        const existingChat = await ChatModel.findOne({
+            participants: { $all: [currentUser._id, targetUser._id] }
+        });
+
+        if (existingChat) {
+            // Chat already exists, redirect to existing chat
+            console.log(`Redirecting to existing chat: ${existingChat._id}`);
+            return res.redirect(`/chat/${existingChat._id}`);
+        }
+
+        // Create new chat session
+        const chatSession = new ChatModel({
+            participants: [currentUser._id, targetUser._id],
+            messages: []
+        });
+        
+        await chatSession.save();
+        console.log(`New chat created: ${chatSession._id} between ${currentUser.username} and ${targetUser.username}`);
+
+        res.redirect(`/chat/${chatSession._id}`);
+    } catch (error) {
+        console.error('Error creating chat:', error);
+        res.status(500).json({ success: false, message: 'An error occurred while creating the chat. Please try again.' });
     }
-
-    if (username === currentUser.username) {
-        return res.json({ success: false, message: "You cannot create a chat with yourself." });
-    }
-
-    const targetUser = await User.findOne({ username });
-    if (!targetUser) {
-        return res.json({ success: false, message: 'User not found.' });
-    }
-
-    const chatSession = new ChatModel({
-        participants: [currentUser._id, targetUser._id],
-        messages: []
-    });
-    await chatSession.save();
-
-    res.redirect(`/chat/${chatSession._id}`);
 });
 
 router.get('/chat/:chatSessionId', isAuthenticated, async (req, res) => {
