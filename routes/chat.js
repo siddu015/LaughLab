@@ -123,11 +123,30 @@ router.post('/send-message/:chatSessionId', isAuthenticated, async (req, res) =>
         // Save the updated chat session
         await chatSession.save();
 
-        // Respond with success and the updated messages
-        res.status(200).json({ message: 'Message sent successfully.', chatSession });
+        // Check if this is an AJAX request
+        const isAjaxRequest = req.xhr || (req.headers.accept && req.headers.accept.includes('json')) || 
+                             (req.headers['content-type'] && req.headers['content-type'].includes('application/json'));
+        
+        if (isAjaxRequest) {
+            // For AJAX requests, respond with JSON
+            return res.status(200).json({ 
+                success: true, 
+                message: 'Message sent successfully.',
+                chatSession 
+            });
+        } else {
+            // For regular form submissions, redirect back to the chat page
+            return res.redirect(`/chat/${chatSessionId}`);
+        }
     } catch (error) {
         console.error('Error sending message:', error);
-        res.status(500).send('Error sending message.');
+        // Handle error based on request type
+        if (req.xhr || (req.headers.accept && req.headers.accept.includes('json')) || 
+            (req.headers['content-type'] && req.headers['content-type'].includes('application/json'))) {
+            return res.status(500).json({ success: false, error: 'Error sending message.' });
+        } else {
+            return res.status(500).send('Error sending message.');
+        }
     }
 });
 

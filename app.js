@@ -24,6 +24,12 @@ app.use(methodOverride('_method'));
 app.engine('ejs', ejsMate);
 app.use(express.static(path.join(__dirname, "/public")));
 
+// Set default content type for responses
+app.use((req, res, next) => {
+    res.setHeader('Content-Type', 'text/html; charset=utf-8');
+    next();
+});
+
 app.use(session({
     secret: 'your-secret-key',
     resave: false,
